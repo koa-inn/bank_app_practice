@@ -132,7 +132,7 @@ def initialize():
     return new_holder
 
 
-def menu(holder):
+def menu(holder: Holder):
     """ Main user interface for the bank app. """
 
     print("=============================")
