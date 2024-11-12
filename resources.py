@@ -1,6 +1,6 @@
 from typing import List
 import datetime
-
+import os
 ###
 
 class Account():
@@ -8,23 +8,31 @@ class Account():
     def __init__(self, acc_type: str, acc_number: int, holder, holder_name: str, balance: float, transaction_history: List[tuple]):
         Account.account_instances.append(self) ## to record instances of each account
         self.acc_type = acc_type
-        self.__acc_number = acc_number
+        self.acc_number = acc_number
         self.holder = holder
         self.holder_name = holder_name
         self.balance = balance
         self.transaction_history = transaction_history
+        self.filename = str(self.acc_number)+"_"+self.acc_type+"_"+self.holder_name+".txt"
+        with open(str(self.acc_number)+"_"+self.acc_type+"_"+self.holder_name+".txt", "w") as file:
+            file.write("--------------------------------------------\n  Transaction Date   |   Type    | Amount \n--------------------------------------------\n")
+
 
     def make_deposit(self, amount: float):
         assert amount > 0
         self.balance += amount
         dt_of_deposit = datetime.datetime.now()
         self.transaction_history.append((dt_of_deposit.strftime("%d/%b/%Y %H:%M:%S"), 'deposit  ',amount))
+        with open(self.filename,'a') as file:
+            file.write(dt_of_deposit.strftime("%d/%b/%Y %H:%M:%S")+" | deposit   | $ "+str(amount)+"\n")
 
     def make_withdrawl(self, amount: float):
         assert amount > 0 and amount <= self.balance
         self.balance -= amount
         dt_of_withdrawl = datetime.datetime.now()
         self.transaction_history.append((dt_of_withdrawl.strftime("%d/%b/%Y %H:%M:%S"), 'withdrawl', -amount))
+        with open(self.filename,'a') as file:
+            file.write(dt_of_withdrawl.strftime("%d/%b/%Y %H:%M:%S")+" | withdrawl | $ "+str(-amount)+"\n")
 
     def get_history(self):
         return self.transaction_history
@@ -39,7 +47,7 @@ class Account():
         return self.holder_name
     
     def get_acc_number(self):
-        return self.__acc_number
+        return self.acc_number
     
     def get_summary(self):
         return self.__dict__
@@ -117,6 +125,8 @@ def create_account(new_holder: Holder) -> Account:
                             holder_name = new_holder.name,
                             balance = starting_balance,
                             transaction_history = [])
+    #with open(new_account.filename) as file:
+    #    file.write("--------------------------------------------\n  Transaction Date   |   Type    | Amount \n--------------------------------------------")
     new_holder.accounts.append(new_account)
     print(f"You have succesfully opened a new {new_account.get_acc_type()} account.")
     return new_account
@@ -211,7 +221,7 @@ def menu(holder: Holder):
                 print("  Transaction Date   |   Type    | Amount ")
                 print("--------------------------------------------")
                 for entry in transaction_hist:
-                    print(f"{entry[0]} | {entry[1]} | {entry[2]}")
+                    print(f"{entry[0]} | {entry[1]} | $ {entry[2]}")
             
         else:
             print("-----------------------------")
